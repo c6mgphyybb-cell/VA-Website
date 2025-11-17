@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VeteransCoverage — Life Insurance for Veterans</title>
+  <meta name="description" content="Life insurance for veterans & families. Compare options in 60 seconds. Not affiliated with the U.S. Department of Veterans Affairs." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+    .shadow-soft { box-shadow: 0 8px 20px rgba(2, 6, 23, 0.06); }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 1px, 1px); white-space: nowrap; border: 0; }
+  </style>
+  <script>
+    // ========= SIMPLE CONFIG (EDIT THESE) =========
+    const CONFIG = {
+      BRAND: "VeteransCoverage",
+      PHONE_DISPLAY: "215-480-2677",
+      PHONE_TEL: "+12154802677",
+      // IMPORTANT: use the /exec URL
+      FORM_ENDPOINT: "https://script.google.com/macros/s/AKfycbyivaI374xkAgEWDcwp672ex6IrRn0UZ0LRvOpqHExQJhMas7crrs4Gkkyner7dAYhA/exec",
+      CALENDLY_URL: "https://calendly.com/your-link/benefits-check",
+      LICENSE_STATES: [
+        "AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA",
+        "ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK",
+        "OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"
+      ],
+      LICENSE_STATES_LABEL: "All States",
+      NPN: "12345678"
+    };
+    // ==============================================
+
+    function getUTM() {
+      const p = new URLSearchParams(location.search);
+      const keys = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"]; 
+      const utm = {};
+      keys.forEach(function (k) {
+        utm[k] = p.get(k) || "";
+      });
+      return utm;
+    }
+
+    function setText(sel, text) {
+      document.querySelectorAll(sel).forEach(function (el) {
+        el.textContent = text;
+      });
+    }
+
+    function setHref(sel, href) {
+      document.querySelectorAll(sel).forEach(function (el) {
+        el.setAttribute('href', href);
+      });
+    }
+
+    function normalizePhone(s) {
+      return (s || "").replace(/[^\d+]/g, "");
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      // Branding
+      setText('.js-brand', CONFIG.BRAND);
+      document.title = CONFIG.BRAND + ' — Life Insurance for Veterans';
+      setText('.js-phone', CONFIG.PHONE_DISPLAY);
+      setHref('.js-tel', 'tel:' + CONFIG.PHONE_TEL);
+      setText(
+        '.js-states',
+        CONFIG.LICENSE_STATES_LABEL || (CONFIG.LICENSE_STATES || []).join(', ')
+      );
+      setText('.js-npn', CONFIG.NPN);
+      if (CONFIG.CALENDLY_URL) setHref('.js-calendly', CONFIG.CALENDLY_URL);
+
+      // UTM stash
+      window.__utm = getUTM();
+
+      // Step logic
+      const step1 = document.getElementById('step1');
+      const step2 = document.getElementById('step2');
+      const stepBars = document.querySelectorAll('.js-stepbar');
+      let step = 1;
+
+      function go(n) {
+        step = n;
+        if (step1 && step2) {
+          step1.classList.toggle('hidden', step !== 1);
+          step2.classList.toggle('hidden', step !== 2);
+        }
+        stepBars.forEach(function (b, i) {
+          b.classList.toggle('bg-emerald-500', i < step);
+          b.classList.toggle('bg-slate-300', i >= step);
+        });
+      }
+
+      function err(msg) {
+        const box = document.getElementById('errorBox');
+        if (!box) return;
+        if (!msg) {
+          box.classList.add('hidden');
+          box.textContent = '';
+          return;
+        }
+        box.classList.remove('hidden');
+        box.textContent = msg;
+      }
+
+      function calculateAge(dobString) {
+        if (!dobString) return '';
+        const dob = new Date(dobString);
+        if (isNaN(dob.getTime())) return '';
+        const diff = Date.now() - dob.getTime();
+        const ageDate = new Date(diff);
+        return Math.abs(ageDate.getUTCFullYear() - 1970);
+      }
+
+      function vStep1() {
+        const zipEl = document.getElementById('zip');
+        const stateEl = document.getElementById('state');
+        const zip = zipEl ? (zipEl.value || '').trim() : '';
+        const state = stateEl ? stateEl.value : '';
+        const cov = document.querySelector('input[name="coverage"]:checked');
+
+        if (!/^\d{5}$/.test(zip)) return 'Enter a valid 5-digit ZIP.';
+        if (!state) return 'Select your state.';
+        if (!cov) return 'Select a coverage amount.';
+        return '';
+      }
+
+      function vStep2() {
+        const fullNameEl = document.getElementById('fullName');
+        const emailEl = document.getElementById('email');
+        const phoneEl = document.getElementById('phone');
+        const consentEl = document.getElementById('consent');
+
+        const fullName = fullNameEl ? (fullNameEl.value || '').trim() : '';
+        const email = emailEl ? (emailEl.value || '').trim() : '';
+        const phone = phoneEl ? (phoneEl.value || '').trim() : '';
+        const consent = !!(consentEl && consentEl.checked);
+        
+        if (!fullName) return "What's your full name?";
+        if (!email) return "Please enter your email address.";
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Enter a valid email address.';
+        if (!phone) return "Please enter your phone number.";
+        const normalizedPhone = normalizePhone(phone);
+        if (!/^\+?\d{10,15}$/.test(normalizedPhone)) return 'Enter a valid 10-digit phone number.';
+        if (!consent) return 'Please agree to the TCPA consent to continue.';
+        return '';
+      }
+
+      // Coverage toggle buttons -> radios
+      document.querySelectorAll('[data-cov-btn]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          const val = btn.getAttribute('data-cov-btn');
+          const radio = document.getElementById('cov_' + val);
+          if (radio) radio.checked = true;
+          // update button styles
+          document.querySelectorAll('[data-cov-btn]').forEach(function (b) {
+            b.classList.remove('border-emerald-600', 'bg-emerald-50', 'text-emerald-700');
+            b.classList.add('border-slate-300', 'text-slate-700');
+          });
+          btn.classList.remove('border-slate-300', 'text-slate-700');
+          btn.classList.add('border-emerald-600', 'bg-emerald-50', 'text-emerald-700');
+        });
+      });
+
+      // Tobacco & contact pill radios
+      function wirePills(name) {
+        document.querySelectorAll('[data-pill^="' + name + ':"]').forEach(function (p) {
+          p.addEventListener('click', function () {
+            const raw = p.getAttribute('data-pill') || '';
+            const parts = raw.split(':');
+            const val = parts.length > 1 ? parts[1] : '';
+            document.querySelectorAll('[data-pill^="' + name + ':"]').forEach(function (x) {
+              x.classList.remove('border-emerald-600', 'bg-emerald-50', 'text-emerald-700');
+              x.classList.add('border-slate-300', 'text-slate-700');
+            });
+            p.classList.remove('border-slate-300', 'text-slate-700');
+            p.classList.add('border-emerald-600', 'bg-emerald-50', 'text-emerald-700');
+            const r = document.getElementById(name + '_' + val);
+            if (r) r.checked = true;
+          });
+        });
+      }
+      wirePills('tobacco');
+      wirePills('contact');
+
+      // Defaults for coverage & tobacco
+      (function () {
+        const defaultCov = document.getElementById('cov_$25k');
+        const defaultCovBtn = document.querySelector('[data-cov-btn="$25k"]');
+        if (defaultCov) defaultCov.checked = true;
+        if (defaultCovBtn) {
+          defaultCovBtn.classList.remove('border-slate-300', 'text-slate-700');
+          defaultCovBtn.classList.add('border-emerald-600', 'bg-emerald-50', 'text-emerald-700');
+        }
+        const tobNo = document.querySelector('[data-pill="tobacco:No"]');
+        if (tobNo) {
+          tobNo.classList.remove('border-slate-300', 'text-slate-700');
+          tobNo.classList.add('border-emerald-600', 'bg-emerald-50', 'text-emerald-700');
+        }
+      })();
+
+      // DOB min/max 18–85
+      (function () {
+        const dob = document.getElementById('dob');
+        if (dob) {
+          const now = new Date();
+          const y = now.getFullYear();
+          const mm = String(now.getMonth() + 1).padStart(2, '0');
+          const dd = String(now.getDate()).padStart(2, '0');
+          dob.setAttribute('max', (y - 18) + '-' + mm + '-' + dd);
+          dob.setAttribute('min', (y - 85) + '-' + mm + '-' + dd);
+        }
+      })();
+
+      const nextBtn = document.getElementById('nextBtn');
+      if (nextBtn) {
+        nextBtn.addEventListener('click', function () {
+          const v = vStep1();
+          if (v) { err(v); return; }
+          err('');
+          go(2);
+        });
+      }
+
+      const backBtn = document.getElementById('backBtn');
+      if (backBtn) {
+        backBtn.addEventListener('click', function () {
+          err('');
+          go(1);
+        });
+      }
+
+      const form = document.getElementById('leadForm');
+
+      if (form) {
+        // ✅ SUBMIT via URL-ENCODED (no preflight/CORS issues)
+        form.addEventListener('submit', async function (e) {
+          console.log('Form submitted');
+          e.preventDefault();
+          err('');
+
+          const v = vStep2();
+          if (v) { err(v); return; }
+
+          // Honeypot
+          const middleNameEl = document.getElementById('middleName');
+          if (middleNameEl && middleNameEl.value) {
+            err('Submission blocked. Please call us by phone.');
+            return;
+          }
+
+          // Collect payload
+          const formData = new FormData(e.target);
+          const payload = {
+            brand: CONFIG.BRAND,
+            npn: CONFIG.NPN,
+            license_states: CONFIG.LICENSE_STATES,
+            page_url: location.href,
+            timestamp: new Date().toISOString(),
+            utm: window.__utm || {},
+            zip: (formData.get('zip') || '').trim(),
+            state: formData.get('state') || '',
+            dob: formData.get('dob') || '',
+            age: formData.get('dob') ? calculateAge(formData.get('dob')) : '',
+            coverage: formData.get('coverage') || '',
+            tobacco: formData.get('tobacco') || 'No',
+            fullName: (formData.get('fullName') || '').trim(),
+            email: (formData.get('email') || '').trim(),
+            phone: normalizePhone((formData.get('phone') || '').trim()),
+            contactPref: formData.get('contact') || 'Call',
+            // Checkboxes sharing name="healthFlag"
+            healthFlags: Array.from(e.target.querySelectorAll('input[name="healthFlag"]:checked')).map(function (c) { return c.value; }),
+            // Consent checkbox
+            consent: !!formData.get('consent'),
+            user_agent: navigator.userAgent
+          };
+
+          // Build URL-encoded body (preflight-safe)
+          const urlEncoded = new URLSearchParams();
+          Object.keys(payload).forEach(function (key) {
+            const val = payload[key];
+            if (Array.isArray(val)) {
+              val.forEach(function (v) { urlEncoded.append(key, v); });
+            } else if (val && typeof val === 'object') {
+              // Objects (utm) -> JSON string
+              urlEncoded.append(key, JSON.stringify(val));
+            } else {
+              urlEncoded.append(key, String(val == null ? '' : val));
+            }
+          });
+
+          const submitBtn = document.getElementById('submitBtn');
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-60');
+            submitBtn.textContent = 'Submitting...';
+            submitBtn.classList.remove('hover:bg-emerald-700');
+          }
+
+          try {
+            if (!CONFIG.FORM_ENDPOINT) throw new Error("FORM_ENDPOINT is not set");
+
+            const res = await fetch(CONFIG.FORM_ENDPOINT, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+              body: urlEncoded.toString()
+            });
+
+            const text = await res.text(); // read response
+            let ok = res.ok;
+
+            // accept success in JSON or plain text
+            try {
+              const j = JSON.parse(text);
+              if (j && (j.status === 'success' || j.result === 'success')) {
+                ok = true;
+              }
+            } catch (eJson) {
+              if (/success/i.test(text)) {
+                ok = true;
+              }
+            }
+
+            if (!ok) {
+              throw new Error(text ? text.slice(0, 200) : 'Submission failed. Please try again or call us.');
+            }
+
+            // success UI
+            if (submitBtn) {
+              submitBtn.textContent = 'Thank you! An agent will contact you shortly.';
+              submitBtn.classList.add('bg-emerald-500');
+              submitBtn.classList.remove('bg-emerald-600');
+            }
+
+            setTimeout(function () {
+              e.target.classList.add('hidden');
+              const thanksEl = document.getElementById('thanks');
+              if (thanksEl) {
+                const fullNameEl2 = document.getElementById('fullName');
+                const fullNameVal = fullNameEl2 ? (fullNameEl2.value || '').trim() : '';
+                const finalName = fullNameVal || 'friend';
+                thanksEl.querySelectorAll('.js-fullname').forEach(function (el) {
+                  el.textContent = finalName;
+                });
+                thanksEl.querySelectorAll('.js-phone').forEach(function (el) {
+                  el.textContent = CONFIG.PHONE_DISPLAY;
+                });
+                thanksEl.classList.remove('hidden');
+                setTimeout(function () {
+                  thanksEl.style.opacity = '1';
+                  thanksEl.style.transform = 'translateY(0)';
+                  thanksEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 10);
+              }
+            }, 1200);
+
+          } catch (e2) {
+            console.error('Submission error:', e2);
+            err(e2.message || "We couldn't submit the form. Please call us or try again.");
+          } finally {
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.classList.remove('opacity-60');
+              submitBtn.textContent = 'Submit';
+              submitBtn.classList.add('hover:bg-emerald-700');
+              submitBtn.classList.remove('bg-emerald-500');
+              submitBtn.classList.add('bg-emerald-600');
+            }
+          }
+        });
+      }
+
+      // Mobile menu
+      const menuBtn = document.getElementById('menuBtn');
+      const menu = document.getElementById('menu');
+      if (menuBtn && menu) {
+        menuBtn.addEventListener('click', function () {
+          menu.classList.toggle('hidden');
+        });
+      }
+
+      // Sticky bar button
+      const stickyCall = document.getElementById('stickyCall');
+      if (stickyCall) {
+        stickyCall.setAttribute('href', 'tel:' + CONFIG.PHONE_TEL);
+      }
+
+      // Initialize
+      go(1);
+    });
+  </script>
+</head>
+<body class="min-h-screen bg-white text-slate-800">
+  <!-- Header / Hero -->
+  <section class="relative overflow-hidden">
+    <div class="absolute inset-0 -z-10 bg-gradient-to-b from-emerald-50 to-white"></div>
+    <header class="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-5">
+      <div class="flex items-center gap-3">
+        <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-600 text-white font-bold">VA</span>
+        <span class="font-semibold text-slate-800 js-brand">VeteransCoverage</span>
+      </div>
+      <nav class="hidden items-center gap-6 text-sm text-slate-700 md:flex">
+        <a href="#how" class="hover:text-slate-900">How it works</a>
+        <a href="#vgli" class="hover:text-slate-900">VGLI vs Private</a>
+        <a href="#faqs" class="hover:text-slate-900">FAQs</a>
+        <a href="#contact" class="hover:text-slate-900">Contact</a>
+        <a class="inline-flex items-center gap-2 rounded-2xl border border-emerald-600 px-3 py-1.5 text-emerald-700 js-tel" href="tel:+12154802677">
+          Call <span class="js-phone">215-480-2677</span>
+        </a>
+      </nav>
+      <button id="menuBtn" class="md:hidden" aria-label="Toggle menu">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+      </button>
+    </header>
+    <div id="menu" class="mx-4 hidden rounded-2xl border bg-white p-4 shadow md:hidden">
+      <a href="#how" class="block py-2">How it works</a>
+      <a href="#vgli" class="block py-2">VGLI vs Private</a>
+      <a href="#faqs" class="block py-2">FAQs</a>
+      <a href="#contact" class="block py-2">Contact</a>
+      <a class="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-emerald-600 px-3 py-2 text-emerald-700 js-tel" href="tel:+12154802677">
+        Call <span class="js-phone">215-480-2677</span>
+      </a>
+    </div>
+
+    <div class="mx-auto grid w-full max-w-6xl items-center gap-8 px-4 py-10 md:grid-cols-2 md:py-16">
+      <div>
+        <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+          Life Insurance for Veterans & Families — Compare in 60 Seconds
+        </h1>
+        <p class="mt-3 text-slate-700">
+          Transitioning from SGLI/VGLI or need coverage now? We shop top-rated carriers for you. Not affiliated with the U.S. Department of Veterans Affairs.
+        </p>
+        <div class="mt-4">
+          <p class="text-sm font-semibold text-slate-900">Which best describes you?</p>
+          <div class="mt-2 grid gap-2 text-xs text-slate-700 sm:grid-cols-2">
+            <a href="#quote" class="rounded-xl border border-slate-300 bg-white px-3 py-2 hover:border-emerald-600 hover:bg-emerald-50">I recently left the service</a>
+            <a href="#quote" class="rounded-xl border border-slate-300 bg-white px-3 py-2 hover:border-emerald-600 hover:bg-emerald-50">I'm on VGLI right now</a>
+            <a href="#quote" class="rounded-xl border border-slate-300 bg-white px-3 py-2 hover:border-emerald-600 hover:bg-emerald-50">I've never had life insurance</a>
+            <a href="#quote" class="rounded-xl border border-slate-300 bg-white px-3 py-2 hover:border-emerald-600 hover:bg-emerald-50">I'm not sure what I have</a>
+          </div>
+        </div>
+        <div class="mt-6 flex flex-col gap-3 sm:flex-row">
+          <a href="#quote" class="inline-flex items-center justify-center rounded-2xl bg-emerald-600 px-5 py-3 font-medium text-white shadow hover:bg-emerald-700">Get My Quote</a>
+          <a class="inline-flex items-center justify-center rounded-2xl border border-slate-300 px-5 py-3 font-medium text-slate-800 hover:bg-slate-50 js-tel" href="tel:+12154802677">Tap to Call <span class="ml-1 js-phone">215-480-2677</span></a>
+        </div>
+        <div class="mt-6 flex flex-wrap items-center gap-3 text-xs text-slate-600">
+          <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1">Licensed in <span class="ml-1 js-states">All States</span></span>
+          <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1">A+ BBB</span>
+          <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1">Fast approvals</span>
+        </div>
+      </div>
+
+      <!-- Lead Form Card -->
+      <div id="quote" class="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+        <div class="mb-3 flex items-start justify-between gap-3">
+          <div class="flex-1">
+            <h2 class="text-lg font-semibold text-slate-900">Get your quick quote</h2>
+            <p class="mt-1 text-xs text-slate-600">Get a free personalized quote in under 60 seconds. No SSN required. No obligation. No hard credit check.</p>
+          </div>
+          <div class="flex items-center gap-2 text-xs text-slate-600">
+            <div class="js-stepbar h-2 w-10 rounded-full bg-emerald-500"></div>
+            <div class="js-stepbar h-2 w-10 rounded-full bg-slate-300"></div>
+          </div>
+        </div>
+        <div id="errorBox" class="mb-3 hidden rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700"></div>
+
+        <form id="leadForm">
+          <!-- Step 1 -->
+          <div id="step1" class="grid gap-3">
+            <div class="grid gap-1">
+              <label for="zip" class="text-sm font-medium">ZIP code</label>
+              <input id="zip" name="zip" inputmode="numeric" maxlength="5" placeholder="e.g., 19053" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm placeholder-slate-400 focus:border-emerald-600" required />
+              <p class="mt-1 text-xs text-slate-500">So we can show state-specific options.</p>
+            </div>
+            <div class="grid gap-1">
+              <label for="state" class="text-sm font-medium">State</label>
+              <select id="state" name="state" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:border-emerald-600" required>
+                <option value="">Select your state</option>
+                <option value="AL">Alabama (AL)</option>
+                <option value="AK">Alaska (AK)</option>
+                <option value="AZ">Arizona (AZ)</option>
+                <option value="AR">Arkansas (AR)</option>
+                <option value="CA">California (CA)</option>
+                <option value="CO">Colorado (CO)</option>
+                <option value="CT">Connecticut (CT)</option>
+                <option value="DE">Delaware (DE)</option>
+                <option value="DC">District of Columbia (DC)</option>
+                <option value="FL">Florida (FL)</option>
+                <option value="GA">Georgia (GA)</option>
+                <option value="HI">Hawaii (HI)</option>
+                <option value="ID">Idaho (ID)</option>
+                <option value="IL">Illinois (IL)</option>
+                <option value="IN">Indiana (IN)</option>
+                <option value="IA">Iowa (IA)</option>
+                <option value="KS">Kansas (KS)</option>
+                <option value="KY">Kentucky (KY)</option>
+                <option value="LA">Louisiana (LA)</option>
+                <option value="ME">Maine (ME)</option>
+                <option value="MD">Maryland (MD)</option>
+                <option value="MA">Massachusetts (MA)</option>
+                <option value="MI">Michigan (MI)</option>
+                <option value="MN">Minnesota (MN)</option>
+                <option value="MS">Mississippi (MS)</option>
+                <option value="MO">Missouri (MO)</option>
+                <option value="MT">Montana (MT)</option>
+                <option value="NE">Nebraska (NE)</option>
+                <option value="NV">Nevada (NV)</option>
+                <option value="NH">New Hampshire (NH)</option>
+                <option value="NJ">New Jersey (NJ)</option>
+                <option value="NM">New Mexico (NM)</option>
+                <option value="NY">New York (NY)</option>
+                <option value="NC">North Carolina (NC)</option>
+                <option value="ND">North Dakota (ND)</option>
+                <option value="OH">Ohio (OH)</option>
+                <option value="OK">Oklahoma (OK)</option>
+                <option value="OR">Oregon (OR)</option>
+                <option value="PA">Pennsylvania (PA)</option>
+                <option value="RI">Rhode Island (RI)</option>
+                <option value="SC">South Carolina (SC)</option>
+                <option value="SD">South Dakota (SD)</option>
+                <option value="TN">Tennessee (TN)</option>
+                <option value="TX">Texas (TX)</option>
+                <option value="UT">Utah (UT)</option>
+                <option value="VT">Vermont (VT)</option>
+                <option value="VA">Virginia (VA)</option>
+                <option value="WA">Washington (WA)</option>
+                <option value="WV">West Virginia (WV)</option>
+                <option value="WI">Wisconsin (WI)</option>
+                <option value="WY">Wyoming (WY)</option>
+              </select>
+            </div>
+            <div class="grid gap-1">
+              <label for="dob" class="text-sm font-medium">Date of birth</label>
+              <input id="dob" name="dob" type="date" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:border-emerald-600" required />
+              <p class="mt-1 text-xs text-slate-500">We'll calculate your age automatically.</p>
+            </div>
+            <div class="grid gap-1">
+              <span class="text-sm font-medium">Coverage amount</span>
+              <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                <!-- Radios (hidden) -->
+                <input class="sr-only" type="radio" id="cov_$10k" name="coverage" value="$10k" />
+                <input class="sr-only" type="radio" id="cov_$25k" name="coverage" value="$25k" />
+                <input class="sr-only" type="radio" id="cov_$50k" name="coverage" value="$50k" />
+                <input class="sr-only" type="radio" id="cov_$100k+" name="coverage" value="$100k+" />
+                <!-- Pills -->
+                <button type="button" data-cov-btn="$10k" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-700">$10k</button>
+                <button type="button" data-cov-btn="$25k" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-700">$25k</button>
+                <button type="button" data-cov-btn="$50k" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-700">$50k</button>
+                <button type="button" data-cov-btn="$100k+" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-700">$100k+</button>
+              </div>
+            </div>
+            <div class="grid gap-1">
+              <span class="text-sm font-medium">Tobacco use</span>
+              <div class="flex gap-2">
+                <input class="sr-only" type="radio" id="tobacco_No" name="tobacco" value="No" checked>
+                <input class="sr-only" type="radio" id="tobacco_Yes" name="tobacco" value="Yes" />
+                <label data-pill="tobacco:No" class="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-700">No</label>
+                <label data-pill="tobacco:Yes" class="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-700">Yes</label>
+              </div>
+            </div>
+            <div class="flex items-center justify-between pt-1">
+              <div class="text-xs text-slate-600">Step 1 of 2</div>
+              <button id="nextBtn" type="button" class="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">Next</button>
+            </div>
+            <!-- Honeypot -->
+            <input aria-hidden="true" tabindex="-1" class="hidden" autocomplete="off" id="middleName" name="middleName" />
+          </div>
+
+          <!-- Step 2 -->
+          <div id="step2" class="hidden grid gap-3">
+            <div class="grid gap-1">
+              <label for="fullName" class="text-sm font-medium">Full name</label>
+              <input id="fullName" name="fullName" placeholder="e.g., Alex Johnson" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm placeholder-slate-400 focus:border-emerald-600" required />
+            </div>
+            <div class="grid gap-1">
+              <label for="email" class="text-sm font-medium">Email</label>
+              <input id="email" name="email" type="email" placeholder="you@example.com" pattern="[^@\s]+@[^@\s]+\.[^@\s]+" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm placeholder-slate-400 focus:border-emerald-600" required />
+            </div>
+            <div class="grid gap-1">
+              <label for="phone" class="text-sm font-medium">Mobile phone</label>
+              <input id="phone" name="phone" type="tel" inputmode="tel" placeholder="(555) 123-4567" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm placeholder-slate-400 focus:border-emerald-600" required />
+              <p class="mt-1 text-xs text-slate-500">Only used to discuss your quote. No spam blasts.</p>
+            </div>
+            <div class="grid gap-1">
+              <span class="text-sm font-medium">Preferred contact</span>
+              <div class="flex gap-2">
+                <input class="sr-only" type="radio" id="contact_Call" name="contact" value="Call" checked>
+                <input class="sr-only" type="radio" id="contact_Text" name="contact" value="Text" />
+                <label data-pill="contact:Call" class="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-700">Call</label>
+                <label data-pill="contact:Text" class="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-700">Text</label>
+              </div>
+            </div>
+            <fieldset class="grid gap-2">
+              <legend class="text-sm font-medium">Any of these apply? <span class="font-normal text-slate-500">(optional)</span></legend>
+              <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <label class="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-700"><input type="checkbox" name="healthFlag" value="High blood pressure"> High blood pressure</label>
+                <label class="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-700"><input type="checkbox" name="healthFlag" value="Diabetes"> Diabetes</label>
+                <label class="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-700"><input type="checkbox" name="healthFlag" value="PTSD treatment"> PTSD treatment</label>
+                <label class="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-700"><input type="checkbox" name="healthFlag" value="Recent VA disability rating"> Recent VA disability rating</label>
+              </div>
+            </fieldset>
+            <p class="text-xs text-slate-500">After you submit, a licensed agent will call or text you within 5–15 minutes during business hours to walk through your options.</p>
+            <!-- ✅ CONSENT now has name + required -->
+            <label class="mt-2 flex items-start gap-2 text-xs text-slate-600">
+              <input id="consent" name="consent" type="checkbox" required />
+              <span>By clicking Submit, you agree to our <a href="#terms" class="underline">Terms</a> and <a href="#privacy" class="underline">Privacy Policy</a>, and authorize <span class="js-brand">VeteransCoverage</span> to contact you at the number and email provided, including via autodialer, prerecorded messages, and text. Consent is not a condition of purchase.</span>
+            </label>
+            <div class="flex items-center justify-between">
+              <button id="backBtn" type="button" class="inline-flex items-center justify-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50">Back</button>
+              <button id="submitBtn" type="submit" class="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">Submit</button>
+            </div>
+          </div>
+        </form>
+
+        <!-- Thank You -->
+        <div id="thanks" class="hidden grid gap-4 p-6 text-center">
+          <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 text-2xl">✓</div>
+          <h3 class="text-2xl font-bold text-slate-900">Thank you, <span class="js-fullname">friend</span>!</h3>
+          <p class="text-slate-600">A licensed agent will call or text you within 5–15 minutes during business hours to walk through your options.</p>
+          
+          <div class="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <a class="js-tel inline-flex items-center justify-center rounded-xl bg-emerald-600 px-5 py-3 font-medium text-white hover:bg-emerald-700 w-full sm:w-auto" href="tel:+12154802677">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+              Call Now
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section id="how" class="mx-auto w-full max-w-6xl px-4 py-14">
+    <h2 class="text-2xl font-bold text-slate-900">How it works</h2>
+    <p class="mt-2 text-sm text-slate-600">We keep it simple so you don’t have to. Rates are based on your current age and health, so locking in sooner usually means better options.</p>
+    <div class="mt-6 grid gap-4 sm:grid-cols-3">
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="text-sm font-semibold text-emerald-700">Step 1</div>
+        <div class="mt-1 text-lg font-semibold text-slate-900">Answer a few questions</div>
+        <p class="mt-1 text-sm text-slate-600">ZIP, age, coverage, and contact preferences.</p>
+      </div>
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="text-sm font-semibold text-emerald-700">Step 2</div>
+        <div class="mt-1 text-lg font-semibold text-slate-900">Compare options</div>
+        <p class="mt-1 text-sm text-slate-600">We shop top-rated carriers for veterans & families.</p>
+      </div>
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="text-sm font-semibold text-emerald-700">Step 3</div>
+        <div class="mt-1 text-lg font-semibold text-slate-900">Activate coverage</div>
+        <p class="mt-1 text-sm text-slate-600">Get help picking a plan that fits your budget.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Benefits -->
+  <section class="mx-auto w-full max-w-6xl px-4 py-14">
+    <h2 class="text-2xl font-bold text-slate-900">Why choose <span class="js-brand">VeteransCoverage</span></h2>
+    <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="text-lg font-semibold text-slate-900">No-exam options</div>
+        <p class="mt-1 text-sm text-slate-600">Simplified issue for qualifying ages & amounts.</p>
+      </div>
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="text-lg font-semibold text-slate-900">Fast approvals</div>
+        <p class="mt-1 text-sm text-slate-600">Many decisions in days, not weeks.</p>
+      </div>
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="text-lg font-semibold text-slate-900">Veteran-savvy guidance</div>
+        <p class="mt-1 text-sm text-slate-600">We understand SGLI/VGLI transitions.</p>
+      </div>
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="text-lg font-semibold text-slate-900">Family coverage</div>
+        <p class="mt-1 text-sm text-slate-600">Protect spouses and dependents too.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- VGLI vs Private Table -->
+  <section id="vgli" class="mx-auto w-full max-w-6xl px-4 py-14">
+    <h2 class="text-2xl font-bold text-slate-900">VGLI vs Private Life Insurance</h2>
+    <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+      <table class="w-full text-left text-sm">
+        <thead class="bg-slate-50 text-slate-700">
+          <tr>
+            <th class="p-3">Feature</th>
+            <th class="p-3">VGLI</th>
+            <th class="p-3">Private (through <span class="js-brand">VeteransCoverage</span>)</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y">
+          <tr>
+            <td class="p-3">Eligibility</td>
+            <td class="p-3">Separated servicemembers (time-limited)</td>
+            <td class="p-3">General public (health & underwriting apply)</td>
+          </tr>
+          <tr>
+            <td class="p-3">Rates</td>
+            <td class="p-3">Age-banded, may increase over time</td>
+            <td class="p-3">Term or whole; shop multiple carriers</td>
+          </tr>
+          <tr>
+            <td class="p-3">Medical exam</td>
+            <td class="p-3">Often none if converting timely</td>
+            <td class="p-3">Varies; many no-exam options</td>
+          </tr>
+          <tr>
+            <td class="p-3">Portability</td>
+            <td class="p-3">Yes</td>
+            <td class="p-3">Yes</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="mt-3 text-xs text-slate-600">This is educational, not a rate guarantee. Product availability and eligibility vary by state and carrier.</p>
+    <a href="#quote" class="mt-4 inline-flex items-center rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">Get my comparison</a>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="mx-auto w-full max-w-6xl px-4 py-14">
+    <h2 class="text-2xl font-bold text-slate-900">What veterans say</h2>
+    <div class="mt-6 grid gap-4 md:grid-cols-3">
+      <figure class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <blockquote class="text-slate-700">“Filled out the form, got a call in minutes, and switching from VGLI saved me money.”</blockquote>
+        <figcaption class="mt-2 text-sm font-medium text-slate-900">J. Ramirez, USMC – TX</figcaption>
+      </figure>
+      <figure class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <blockquote class="text-slate-700">“Straight talk, fast help, no pressure at all.”</blockquote>
+        <figcaption class="mt-2 text-sm font-medium text-slate-900">T. Nguyen, Army – CA</figcaption>
+      </figure>
+      <figure class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <blockquote class="text-slate-700">“Got coverage for my spouse in one quick call.”</blockquote>
+        <figcaption class="mt-2 text-sm font-medium text-slate-900">M. Harris, Navy – FL</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- FAQs -->
+  <section id="faqs" class="mx-auto w-full max-w-6xl px-4 py-14">
+    <h2 class="text-2xl font-bold text-slate-900">FAQs</h2>
+    <div class="mt-6 grid gap-4 md:grid-cols-2">
+      <details class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <summary class="cursor-pointer text-sm font-semibold text-slate-900">Does VA disability affect premiums?</summary>
+        <p class="mt-2 text-sm text-slate-700">Carriers price mainly on age, coverage, tobacco, and health history. Disability ratings don’t directly set premiums, but related conditions may be considered during underwriting.</p>
+      </details>
+      <details class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <summary class="cursor-pointer text-sm font-semibold text-slate-900">Can I get coverage with PTSD?</summary>
+        <p class="mt-2 text-sm text-slate-700">Often yes. Many carriers insure applicants with well-managed mental health treatment. Underwriting varies; we help place the best fit.</p>
+      </details>
+      <details class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <summary class="cursor-pointer text-sm font-semibold text-slate-900">Do I need a medical exam?</summary>
+        <p class="mt-2 text-sm text-slate-700">Not always. Many no-exam or simplified-issue options exist based on age and amount.</p>
+      </details>
+      <details class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <summary class="cursor-pointer text-sm font-semibold text-slate-900">What happens after I submit?</summary>
+        <p class="mt-2 text-sm text-slate-700">A licensed agent contacts you to verify details, compare options, and help complete an application if you’re ready.</p>
+      </details>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section id="contact" class="mx-auto w-full max-w-6xl px-4 py-14">
+    <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <h2 class="text-2xl font-bold text-slate-900">Contact</h2>
+      <p class="mt-2 text-slate-700">Call us at <a class="underline js-tel" href="tel:+12154802677"><span class="js-phone">215-480-2677</span></a> or email <a class="underline" href="mailto:helpvalifeguard@gmail.com">helpvalifeguard@gmail.com</a>.</p>
+      <p class="mt-2 text-xs text-slate-600">Business hours: Mon–Fri 9:00am–6:00pm ET</p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="mt-10 border-t bg-slate-50">
+    <div class="mx-auto grid w-full max-w-6xl gap-6 px-4 py-10 md:grid-cols-4">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600 text-white font-bold">VA</span>
+          <span class="font-semibold js-brand">VeteransCoverage</span>
+        </div>
+        <p class="mt-2 text-xs text-slate-600">Not affiliated with the U.S. Department of Veterans Affairs or any government agency.</p>
+        <p class="mt-2 text-xs text-slate-600">Insurance products offered through licensed agents. NPN: <span class="js-npn">12345678</span>. Licensed states: <span class="js-states">All States</span>. Availability varies by state and carrier.</p>
+      </div>
+      <div>
+        <div class="font-semibold text-slate-900">Company</div>
+        <ul class="mt-2 space-y-2 text-sm text-slate-700">
+          <li><a href="#how">How it works</a></li>
+          <li><a href="#vgli">VGLI vs Private</a></li>
+          <li><a href="#faqs">FAQs</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="font-semibold text-slate-900">Legal</div>
+        <ul class="mt-2 space-y-2 text-sm text-slate-700">
+          <li><a href="#privacy">Privacy Policy</a></li>
+          <li><a href="#terms">Terms of Use</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="font-semibold text-slate-900">Contact</div>
+        <ul class="mt-2 space-y-2 text-sm text-slate-700">
+          <li><a class="js-tel" href="tel:+12154802677">Call <span class="js-phone">215-480-2677</span></a></li>
+          <li><a class="js-calendly" href="https://calendly.com/your-link/benefits-check" target="_blank" rel="noreferrer">Book a call</a></li>
+          <li><a href="#quote">Get quote</a></li>
+        </ul>
+      </div>
+    </div>
+    <div id="privacy" class="mx-auto w-full max-w-6xl px-4 pb-4 text-xs text-slate-600">
+      <h3 class="mb-2 text-sm font-semibold text-slate-900">Privacy Policy (summary)</h3>
+      <p>We collect the information you provide (ZIP, age, contact details, preferences) to deliver quotes and services. We may share data with licensed insurance partners solely to fulfill your request. We do not sell your personal information. See full policy on request.</p>
+    </div>
+    <div id="terms" class="mx-auto w-full max-w-6xl px-4 pb-8 text-xs text-slate-600">
+      <h3 class="mb-2 text-sm font-semibold text-slate-900">Terms of Use (summary)</h3>
+      <p>By using this site, you agree to our communications policy and to receive contact as described. This site provides educational information, not legal or tax advice. Product availability, features, and rates are subject to carrier underwriting and state regulations.</p>
+    </div>
+  </footer>
+
+  <!-- Sticky Mobile Bar -->
+  <div class="fixed inset-x-0 bottom-0 z-40 mx-auto mb-3 flex max-w-md items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white p-2 shadow md:hidden">
+    <a id="stickyCall" class="inline-flex flex-1 items-center justify-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-800" href="tel:+12154802677">Call</a>
+    <a href="#quote" class="inline-flex flex-1 items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white">Get Quote</a>
+  </div>
+
+  <!-- Google Apps Script Setup Instructions Comment -->
+  <!-- 
+    GOOGLE APPS SCRIPT (accepts URL-encoded form posts and JSON):
+
+    function doPost(e) {
+      const p = e.parameter || {};      // single values from form posts
+      const pa = e.parameters || {};    // arrays from form posts (multiple keys)
+      let bodyJSON = {};
+      try {
+        if (e.postData && e.postData.contents) {
+          bodyJSON = JSON.parse(e.postData.contents);
+        }
+      } catch (_) {}
+
+      // helpers
+      const first = (v, d='') => Array.isArray(v) ? (v[0] ?? d) : (v ?? d);
+      const get = (k, d='') => first(p[k], first(bodyJSON[k], d));
+
+      // UTM may be JSON string or separate keys
+      let utmObj = {};
+      try { utmObj = JSON.parse(get('utm', '{}')); } catch(_) { utmObj = {}; }
+      const utm = {
+        utm_source: get('utm_source', utmObj.utm_source || ''),
+        utm_medium: get('utm_medium', utmObj.utm_medium || ''),
+        utm_campaign: get('utm_campaign', utmObj.utm_campaign || ''),
+        utm_term: get('utm_term', utmObj.utm_term || ''),
+        utm_content: get('utm_content', utmObj.utm_content || '')
+      };
+
+      // arrays: accept from form (pa) or JSON body
+      const licenseStates = pa.license_states || bodyJSON.license_states || [];
+      const healthFlagsArr = pa.healthFlags || bodyJSON.healthFlags || [];
+      const healthFlags = Array.isArray(healthFlagsArr) ? healthFlagsArr.join(', ') : String(healthFlagsArr || '');
+
+      const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+      if (sheet.getLastRow() === 0) {
+        sheet.appendRow([
+          'Received At','Brand','NPN','ZIP','State','DOB','Age','Coverage','Tobacco',
+          'Full Name','Email','Phone','Preferred Contact','Health Flags','TCPA Consent',
+          'User Agent','UTM Source','UTM Medium','UTM Campaign','UTM Term','UTM Content',
+          'Page URL','Client Timestamp','License States (CSV)','License States Count'
+        ]);
+      }
+
+      const row = [
+        new Date(),
+        get('brand'),
+        get('npn'),
+        get('zip'),
+        get('state'),
+        get('dob'),
+        get('age'),
+        get('coverage'),
+        get('tobacco'),
+        get('fullName'),
+        get('email'),
+        get('phone'),
+        get('contactPref'),
+        healthFlags,
+        String(get('consent')).toLowerCase() === 'true' || get('consent') === true,
+        get('user_agent'),
+        utm.utm_source,
+        utm.utm_medium,
+        utm.utm_campaign,
+        utm.utm_term,
+        utm.utm_content,
+        get('page_url'),
+        get('timestamp'),
+        (licenseStates || []).join(', '),
+        (licenseStates || []).length
+      ];
+
+      sheet.appendRow(row);
+
+      return ContentService.createTextOutput('success')
+        .setMimeType(ContentService.MimeType.TEXT);
+    }
+
+    DEPLOYMENT:
+    1) Deploy → New deployment → Web app
+    2) Execute as: Me
+    3) Who has access: Anyone
+    4) Use the /exec URL in CONFIG.FORM_ENDPOINT
+  -->
+</body>
+</html>
+
