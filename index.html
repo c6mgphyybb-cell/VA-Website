@@ -235,6 +235,9 @@
       const form = document.getElementById('leadForm');
 
       if (form) {
+        // 🚫 Disable native HTML5 validation so our JS (vStep2 + errorBox) always runs
+        form.setAttribute('novalidate', 'novalidate');
+
         // ✅ SUBMIT via URL-ENCODED (no preflight/CORS issues)
         form.addEventListener('submit', async function (e) {
           console.log('Form submitted');
@@ -907,4 +910,3 @@
   -->
 </body>
 </html>
-
