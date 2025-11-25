@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Application - Veterans Life Insurance</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #1e40af;
+      --primary-light: #3b82f6;
+      --background: #ffffff;
+      --foreground: #1f2937;
+      --card: #f9fafb;
+      --border: #e5e7eb;
+      --muted: #6b7280;
+      --error: #dc2626;
+      --white: #ffffff;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background-color: var(--background);
+      color: var(--foreground);
+      line-height: 1.6;
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: var(--foreground);
+      transition: all 0.2s;
+      padding: 0.5rem;
+      border-radius: 0.375rem;
+    }
+
+    .logo svg {
+      width: 2rem;
+      height: 2rem;
+      color: var(--primary);
+    }
+
+    .logo-text {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 0.375rem;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: var(--primary-light);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--foreground);
+      border: 1px solid var(--border);
+    }
+
+    main {
+      padding-top: 8rem;
+      padding-bottom: 4rem;
+      min-height: 100vh;
+    }
+
+    .form-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .form-header h1 {
+      font-size: 2.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .form-header p {
+      font-size: 1.125rem;
+      color: var(--muted);
+      max-width: 42rem;
+      margin: 0 auto;
+    }
+
+    .form-container {
+      max-width: 42rem;
+      margin: 0 auto;
+      background: var(--background);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+
+    .form-header-card {
+      margin-bottom: 2rem;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 0.5rem;
+      background: var(--border);
+      border-radius: 9999px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--primary);
+      transition: width 0.3s;
+    }
+
+    .form-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      font-size: 0.875rem;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 0.375rem;
+      font-size: 1rem;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+    }
+
+    .form-group input.error,
+    .form-group select.error {
+      border-color: var(--error);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 640px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .error-message {
+      color: var(--error);
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+
+    .review-box {
+      background: rgba(0, 0, 0, 0.05);
+      border-radius: 0.375rem;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .review-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .review-item label {
+      color: var(--muted);
+      font-size: 0.875rem;
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    .review-item p {
+      font-weight: 500;
+    }
+
+    .form-footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .form-footer button {
+      flex: 1;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    footer {
+      background: var(--background);
+      border-top: 1px solid var(--border);
+      padding: 3rem 1.5rem;
+      text-align: center;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-container">
+      <a href="index.html" class="logo">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span class="logo-text">Veterans Life</span>
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <div style="max-width: 1280px; margin: 0 auto; padding: 0 1.5rem;">
+      <div class="form-header">
+        <h1>Your Path to Protection Starts Here</h1>
+        <p>Complete the application below to receive your personalized life insurance quote. Takes just 10 minutes.</p>
+      </div>
+
+      <div class="form-container">
+        <div class="form-header-card">
+          <div class="progress-info">
+            <span>Step <span id="current-step">1</span> of 4</span>
+            <span id="progress-percent">25</span>% Complete</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill" style="width: 25%;"></div>
+          </div>
+          <h2 class="form-title" id="step-title">Personal Information</h2>
+        </div>
+
+        <form id="application-form">
+          <!-- Step 1: Personal Information -->
+          <div id="step-1" class="step-content">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="firstName">First Name</label>
+                <input type="text" id="firstName" name="firstName" placeholder="John" required>
+                <span class="error-message" id="firstName-error"></span>
+              </div>
+              <div class="form-group">
+                <label for="lastName">Last Name</label>
+                <input type="text" id="lastName" name="lastName" placeholder="Doe" required>
+                <span class="error-message" id="lastName-error"></span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email Address</label>
+              <input type="email" id="email" name="email" placeholder="john.doe@email.com" required>
+              <span class="error-message" id="email-error"></span>
+            </div>
+
+            <div class="form-group">
+              <label for="phone">Phone Number</label>
+              <input type="tel" id="phone" name="phone" placeholder="(555) 123-4567" required>
+              <span class="error-message" id="phone-error"></span>
+            </div>
+
+            <div class="form-group">
+              <label for="dateOfBirth">Date of Birth</label>
+              <input type="date" id="dateOfBirth" name="dateOfBirth" required>
+              <span class="error-message" id="dateOfBirth-error"></span>
+            </div>
+          </div>
+
+          <!-- Step 2: Military Service Details -->
+          <div id="step-2" class="step-content hidden">
+            <div class="form-group">
+              <label for="branch">Military Branch</label>
+              <select id="branch" name="branch" required>
+                <option value="">Select your branch</option>
+                <option value="army">U.S. Army</option>
+                <option value="navy">U.S. Navy</option>
+                <option value="air-force">U.S. Air Force</option>
+                <option value="marines">U.S. Marine Corps</option>
+                <option value="coast-guard">U.S. Coast Guard</option>
+                <option value="space-force">U.S. Space Force</option>
+              </select>
+              <span class="error-message" id="branch-error"></span>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="serviceStartDate">Service Start Date</label>
+                <input type="date" id="serviceStartDate" name="serviceStartDate" required>
+                <span class="error-message" id="serviceStartDate-error"></span>
+              </div>
+              <div class="form-group">
+                <label for="serviceEndDate">Service End Date (if applicable)</label>
+                <input type="date" id="serviceEndDate" name="serviceEndDate">
+                <span class="error-message" id="serviceEndDate-error"></span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="status">Service Status</label>
+              <select id="status" name="status" required>
+                <option value="">Select your status</option>
+                <option value="active">Active Duty</option>
+                <option value="reserve">Reserve</option>
+                <option value="veteran">Veteran (Honorably Discharged)</option>
+                <option value="retired">Retired</option>
+              </select>
+              <span class="error-message" id="status-error"></span>
+            </div>
+          </div>
+
+          <!-- Step 3: Coverage & Beneficiaries -->
+          <div id="step-3" class="step-content hidden">
+            <div class="form-group">
+              <label for="coverageAmount">Desired Coverage Amount</label>
+              <select id="coverageAmount" name="coverageAmount" required>
+                <option value="">Select coverage amount</option>
+                <option value="100k">$100,000</option>
+                <option value="250k">$250,000</option>
+                <option value="500k">$500,000</option>
+                <option value="1m">$1,000,000</option>
+                <option value="custom">Custom Amount</option>
+              </select>
+              <span class="error-message" id="coverageAmount-error"></span>
+            </div>
+
+            <div class="form-group">
+              <label for="beneficiaryName">Primary Beneficiary Name</label>
+              <input type="text" id="beneficiaryName" name="beneficiaryName" placeholder="Full name" required>
+              <span class="error-message" id="beneficiaryName-error"></span>
+            </div>
+
+            <div class="form-group">
+              <label for="beneficiaryRelation">Relationship to Beneficiary</label>
+              <select id="beneficiaryRelation" name="beneficiaryRelation" required>
+                <option value="">Select relationship</option>
+                <option value="spouse">Spouse</option>
+                <option value="child">Child</option>
+                <option value="parent">Parent</option>
+                <option value="sibling">Sibling</option>
+                <option value="other">Other</option>
+              </select>
+              <span class="error-message" id="beneficiaryRelation-error"></span>
+            </div>
+          </div>
+
+          <!-- Step 4: Review & Submit -->
+          <div id="step-4" class="step-content hidden">
+            <div class="review-box">
+              <h3 style="margin-bottom: 1rem;">Review Your Information</h3>
+              <div class="review-grid">
+                <div class="review-item">
+                  <label>Name</label>
+                  <p id="review-name">John Doe</p>
+                </div>
+                <div class="review-item">
+                  <label>Email</label>
+                  <p id="review-email">john@email.com</p>
+                </div>
+                <div class="review-item">
+                  <label>Phone</label>
+                  <p id="review-phone">(555) 123-4567</p>
+                </div>
+                <div class="review-item">
+                  <label>Date of Birth</label>
+                  <p id="review-dob">2000-01-01</p>
+                </div>
+                <div class="review-item">
+                  <label>Military Branch</label>
+                  <p id="review-branch">U.S. Army</p>
+                </div>
+                <div class="review-item">
+                  <label>Service Status</label>
+                  <p id="review-status">Active Duty</p>
+                </div>
+                <div class="review-item">
+                  <label>Coverage Amount</label>
+                  <p id="review-coverage">$250,000</p>
+                </div>
+                <div class="review-item">
+                  <label>Beneficiary</label>
+                  <p id="review-beneficiary">Jane Doe</p>
+                </div>
+              </div>
+            </div>
+            <p style="font-size: 0.875rem; color: var(--muted);">By submitting this application, you agree to our terms of service and privacy policy. A specialist will contact you within 24 hours to discuss your coverage options.</p>
+          </div>
+        </form>
+
+        <div class="form-footer">
+          <button type="button" class="btn btn-outline" id="back-btn" onclick="previousStep()">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 1rem; height: 1rem;">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Back
+          </button>
+          <button type="button" class="btn" id="next-btn" onclick="nextStep()">
+            Continue
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 1rem; height: 1rem;">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2024 Veterans Life Insurance. All rights reserved.</p>
+  </footer>
+
+  <script>
+    let currentStep = 1;
+    const totalSteps = 4;
+
+    const fieldsByStep = {
+      1: ['firstName', 'lastName', 'email', 'phone', 'dateOfBirth'],
+      2: ['branch', 'serviceStartDate', 'status'],
+      3: ['coverageAmount', 'beneficiaryName', 'beneficiaryRelation'],
+      4: []
+    };
+
+    const stepTitles = {
+      1: 'Personal Information',
+      2: 'Military Service Details',
+      3: 'Coverage & Beneficiaries',
+      4: 'Review & Submit'
+    };
+
+    function showStep(step) {
+      for (let i = 1; i <= totalSteps; i++) {
+        const element = document.getElementById(`step-${i}`);
+        if (element) {
+          element.classList.toggle('hidden', i !== step);
+        }
+      }
+      
+      document.getElementById('current-step').textContent = step;
+      document.getElementById('step-title').textContent = stepTitles[step];
+      
+      const progress = (step / totalSteps) * 100;
+      document.getElementById('progress-fill').style.width = progress + '%';
+      document.getElementById('progress-percent').textContent = Math.round(progress);
+      
+      document.getElementById('back-btn').disabled = step === 1;
+      
+      const btn = document.getElementById('next-btn');
+      if (step === totalSteps) {
+        btn.innerHTML = 'Submit Application';
+      } else {
+        btn.innerHTML = 'Continue <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 1rem; height: 1rem;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>';
+      }
+      
+      if (step === totalSteps) {
+        updateReview();
+      }
+    }
+
+    function validateFields(fields) {
+      let isValid = true;
+      
+      fields.forEach(field => {
+        const element = document.getElementById(field);
+        const errorElement = document.getElementById(`${field}-error`);
+        let error = '';
+        
+        if (!element.value.trim()) {
+          error = `${element.labels[0]?.textContent || field} is required`;
+          isValid = false;
+        } else if (field === 'email' && !element.value.includes('@')) {
+          error = 'Invalid email address';
+          isValid = false;
+        } else if (field === 'phone' && element.value.replace(/\D/g, '').length < 10) {
+          error = 'Phone number must be at least 10 digits';
+          isValid = false;
+        }
+        
+        if (errorElement) {
+          errorElement.textContent = error;
+        }
+        element.classList.toggle('error', error !== '');
+      });
+      
+      return isValid;
+    }
+
+    function nextStep() {
+      const fields = fieldsByStep[currentStep];
+      
+      if (validateFields(fields)) {
+        if (currentStep < totalSteps) {
+          currentStep++;
+          showStep(currentStep);
+        } else {
+          submitForm();
+        }
+      }
+    }
+
+    function previousStep() {
+      if (currentStep > 1) {
+        currentStep--;
+        showStep(currentStep);
+      }
+    }
+
+    function updateReview() {
+      document.getElementById('review-name').textContent = 
+        document.getElementById('firstName').value + ' ' + document.getElementById('lastName').value;
+      document.getElementById('review-email').textContent = document.getElementById('email').value;
+      document.getElementById('review-phone').textContent = document.getElementById('phone').value;
+      document.getElementById('review-dob').textContent = document.getElementById('dateOfBirth').value;
+      document.getElementById('review-branch').textContent = 
+        document.getElementById('branch').options[document.getElementById('branch').selectedIndex]?.text || '';
+      document.getElementById('review-status').textContent = 
+        document.getElementById('status').options[document.getElementById('status').selectedIndex]?.text || '';
+      document.getElementById('review-coverage').textContent = 
+        document.getElementById('coverageAmount').options[document.getElementById('coverageAmount').selectedIndex]?.text || '';
+      document.getElementById('review-beneficiary').textContent = document.getElementById('beneficiaryName').value;
+    }
+
+    function submitForm() {
+      const formData = {
+        firstName: document.getElementById('firstName').value,
+        lastName: document.getElementById('lastName').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value,
+        dateOfBirth: document.getElementById('dateOfBirth').value,
+        branch: document.getElementById('branch').value,
+        serviceStartDate: document.getElementById('serviceStartDate').value,
+        serviceEndDate: document.getElementById('serviceEndDate').value || null,
+        status: document.getElementById('status').value,
+        coverageAmount: document.getElementById('coverageAmount').value,
+        beneficiaryName: document.getElementById('beneficiaryName').value,
+        beneficiaryRelation: document.getElementById('beneficiaryRelation').value
+      };
+
+      // Submit to backend
+      fetch('/api/applications', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      })
+      .then(response => {
+        if (!response.ok) throw new Error('Submission failed');
+        return response.json();
+      })
+      .then(data => {
+        window.location.href = 'confirmation.html';
+      })
+      .catch(error => {
+        alert('Error submitting application: ' + error.message);
+      });
+    }
+
+    // Initialize
+    showStep(1);
+  </script>
+</body>
+</html>
