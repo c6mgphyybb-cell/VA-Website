@@ -67,7 +67,7 @@
     <nav class="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-white/5">
       <div class="container mx-auto px-6 h-20 flex items-center justify-between">
         <!-- Logo -->
-        <a href="index.html" class="text-2xl font-serif font-bold tracking-tighter text-primary">
+        <a href="#" class="text-2xl font-serif font-bold tracking-tighter text-primary">
           VIP<span class="text-foreground">BARBER</span>
         </a>
 
@@ -77,9 +77,9 @@
           <a href="#about" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors tracking-wide uppercase">About</a>
           <a href="#gallery" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors tracking-wide uppercase">Gallery</a>
           <a href="#contact" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors tracking-wide uppercase">Contact</a>
-          <a href="booking.html" class="bg-primary text-primary-foreground hover:bg-primary/90 font-bold py-2 px-4 rounded-none transition-colors text-sm tracking-wide uppercase">
+          <button class="bg-primary text-primary-foreground hover:bg-primary/90 font-bold py-2 px-4 rounded-none transition-colors">
             Book Appointment
-          </a>
+          </button>
         </div>
 
         <!-- Mobile Menu Toggle -->
@@ -94,9 +94,9 @@
         <a href="#about" class="text-lg font-serif text-foreground hover:text-primary">About</a>
         <a href="#gallery" class="text-lg font-serif text-foreground hover:text-primary">Gallery</a>
         <a href="#contact" class="text-lg font-serif text-foreground hover:text-primary">Contact</a>
-        <a href="booking.html" class="w-full bg-primary text-primary-foreground font-bold py-3 rounded-none text-center uppercase tracking-wide">
+        <button class="w-full bg-primary text-primary-foreground font-bold py-3 rounded-none">
           Book Appointment
-        </a>
+        </button>
       </div>
     </nav>
 
@@ -131,9 +131,9 @@
           </p>
           
           <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a href="booking.html" class="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 font-bold text-base px-8 py-4 uppercase tracking-wider transition-colors inline-flex items-center justify-center">
+            <button class="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 font-bold text-base px-8 py-4 uppercase tracking-wider transition-colors">
               Book Your Seat
-            </a>
+            </button>
             <button class="w-full sm:w-auto border border-white/20 text-white hover:bg-white/10 font-medium text-base px-8 py-4 uppercase tracking-wider transition-colors">
               View Services
             </button>
@@ -153,59 +153,59 @@
           </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <!-- Service 1 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <!-- Service: Regular Haircut -->
           <div class="group overflow-hidden bg-card/50 hover:bg-card transition-colors duration-300 rounded-lg">
-            <div class="relative h-64 overflow-hidden">
+            <div class="relative h-56 overflow-hidden">
               <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors z-10"></div>
               <img
                 src="/attached_assets/generated_images/close_up_professional_haircut_service.png"
-                alt="The Executive Cut"
+                alt="Regular Haircut"
                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               />
             </div>
             <div class="relative z-20 -mt-12 pt-12 px-6 bg-gradient-to-t from-card via-card to-transparent">
               <div class="flex justify-between items-baseline mb-2">
-                <h3 class="text-xl font-serif font-bold text-foreground">The Executive Cut</h3>
-                <span class="text-lg font-bold text-primary">$45</span>
+                <h3 class="text-xl font-serif font-bold text-foreground">Regular Haircut</h3>
+                <span class="text-lg font-bold text-primary">$40</span>
               </div>
             </div>
-            <div class="px-6 pb-8 pt-2">
-              <p class="text-muted-foreground leading-relaxed">
-                Precision haircut tailored to your style, finished with a hot towel neck shave and styling.
+            <div class="px-6 pb-6 pt-2">
+              <p class="text-muted-foreground leading-relaxed text-sm">
+                Classic cut with scissors and clippers, finished with a hot towel and styling product.
               </p>
             </div>
           </div>
 
-          <!-- Service 2 -->
+          <!-- Service: Hair cut & Beard Trim -->
           <div class="group overflow-hidden bg-card/50 hover:bg-card transition-colors duration-300 rounded-lg">
-            <div class="relative h-64 overflow-hidden">
+            <div class="relative h-56 overflow-hidden">
+              <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors z-10"></div>
+              <img
+                src="/attached_assets/generated_images/close_up_professional_haircut_service.png"
+                alt="Hair cut & Beard Trim"
+                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+            </div>
+            <div class="relative z-20 -mt-12 pt-12 px-6 bg-gradient-to-t from-card via-card to-transparent">
+              <div class="flex justify-between items-baseline mb-2">
+                <h3 class="text-xl font-serif font-bold text-foreground">Haircut & Beard Trim</h3>
+                <span class="text-lg font-bold text-primary">$65</span>
+              </div>
+            </div>
+            <div class="px-6 pb-6 pt-2">
+              <p class="text-muted-foreground leading-relaxed text-sm">
+                The complete package. Precision haircut paired with a detailed beard trim and line up.
+              </p>
+            </div>
+          </div>
+
+          <!-- Service: Beard Sculpting -->
+          <div class="group overflow-hidden bg-card/50 hover:bg-card transition-colors duration-300 rounded-lg">
+            <div class="relative h-56 overflow-hidden">
               <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors z-10"></div>
               <img
                 src="/attached_assets/generated_images/hot_towel_shave_and_beard_trim_service.png"
-                alt="Royal Shave"
-                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              />
-            </div>
-            <div class="relative z-20 -mt-12 pt-12 px-6 bg-gradient-to-t from-card via-card to-transparent">
-              <div class="flex justify-between items-baseline mb-2">
-                <h3 class="text-xl font-serif font-bold text-foreground">Royal Shave</h3>
-                <span class="text-lg font-bold text-primary">$35</span>
-              </div>
-            </div>
-            <div class="px-6 pb-8 pt-2">
-              <p class="text-muted-foreground leading-relaxed">
-                Traditional straight razor shave with hot towels, pre-shave oil, and soothing aftershave balm.
-              </p>
-            </div>
-          </div>
-
-          <!-- Service 3 -->
-          <div class="group overflow-hidden bg-card/50 hover:bg-card transition-colors duration-300 rounded-lg">
-            <div class="relative h-64 overflow-hidden">
-              <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors z-10"></div>
-              <img
-                src="/attached_assets/generated_images/vintage_barber_tools_artistic_shot.png"
                 alt="Beard Sculpting"
                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               />
@@ -213,15 +213,177 @@
             <div class="relative z-20 -mt-12 pt-12 px-6 bg-gradient-to-t from-card via-card to-transparent">
               <div class="flex justify-between items-baseline mb-2">
                 <h3 class="text-xl font-serif font-bold text-foreground">Beard Sculpting</h3>
-                <span class="text-lg font-bold text-primary">$25</span>
+                <span class="text-lg font-bold text-primary">$35</span>
               </div>
             </div>
-            <div class="px-6 pb-8 pt-2">
-              <p class="text-muted-foreground leading-relaxed">
-                Expert trimming and shaping to keep your beard looking sharp and well-maintained.
+            <div class="px-6 pb-6 pt-2">
+              <p class="text-muted-foreground leading-relaxed text-sm">
+                Expert reshaping of the beard with clipper and scissor work for optimal symmetry.
               </p>
             </div>
           </div>
+
+          <!-- Service: Beard Trim with Straight Edge -->
+          <div class="group overflow-hidden bg-card/50 hover:bg-card transition-colors duration-300 rounded-lg">
+            <div class="relative h-56 overflow-hidden">
+              <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors z-10"></div>
+              <img
+                src="/attached_assets/generated_images/hot_towel_shave_and_beard_trim_service.png"
+                alt="Beard Trim with Straight Edge"
+                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+            </div>
+            <div class="relative z-20 -mt-12 pt-12 px-6 bg-gradient-to-t from-card via-card to-transparent">
+              <div class="flex justify-between items-baseline mb-2">
+                <h3 class="text-xl font-serif font-bold text-foreground">Razor Beard Trim</h3>
+                <span class="text-lg font-bold text-primary">$45</span>
+              </div>
+            </div>
+            <div class="px-6 pb-6 pt-2">
+              <p class="text-muted-foreground leading-relaxed text-sm">
+                Detailed beard trim finished with a hot towel and straight razor line-up for ultra-sharp edges.
+              </p>
+            </div>
+          </div>
+
+          <!-- Service: Buzz Cut -->
+          <div class="group overflow-hidden bg-card/50 hover:bg-card transition-colors duration-300 rounded-lg">
+            <div class="relative h-56 overflow-hidden">
+              <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors z-10"></div>
+              <img
+                src="/attached_assets/generated_images/vintage_barber_tools_artistic_shot.png"
+                alt="Buzz Cut"
+                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+            </div>
+            <div class="relative z-20 -mt-12 pt-12 px-6 bg-gradient-to-t from-card via-card to-transparent">
+              <div class="flex justify-between items-baseline mb-2">
+                <h3 class="text-xl font-serif font-bold text-foreground">Buzz Cut</h3>
+                <span class="text-lg font-bold text-primary">$30</span>
+              </div>
+            </div>
+            <div class="px-6 pb-6 pt-2">
+              <p class="text-muted-foreground leading-relaxed text-sm">
+                Uniform clipper cut all over. Clean, simple, and sharp. Includes neck shave.
+              </p>
+            </div>
+          </div>
+
+          <!-- Service: Combo Haircut & Full Hot Towel Shave -->
+          <div class="group overflow-hidden bg-card/50 hover:bg-card transition-colors duration-300 rounded-lg">
+            <div class="relative h-56 overflow-hidden">
+              <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors z-10"></div>
+              <img
+                src="/attached_assets/generated_images/close_up_professional_haircut_service.png"
+                alt="Combo Haircut & Shave"
+                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+            </div>
+            <div class="relative z-20 -mt-12 pt-12 px-6 bg-gradient-to-t from-card via-card to-transparent">
+              <div class="flex justify-between items-baseline mb-2">
+                <h3 class="text-xl font-serif font-bold text-foreground">The Royal Combo</h3>
+                <span class="text-lg font-bold text-primary">$90</span>
+              </div>
+            </div>
+            <div class="px-6 pb-6 pt-2">
+              <p class="text-muted-foreground leading-relaxed text-sm">
+                Our premium service. Full haircut plus a luxurious hot towel straight razor shave.
+              </p>
+            </div>
+          </div>
+
+          <!-- Service: Full Hot Towel Shave (Straight Edge) -->
+          <div class="group overflow-hidden bg-card/50 hover:bg-card transition-colors duration-300 rounded-lg">
+            <div class="relative h-56 overflow-hidden">
+              <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors z-10"></div>
+              <img
+                src="/attached_assets/generated_images/hot_towel_shave_and_beard_trim_service.png"
+                alt="Full Hot Towel Shave"
+                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+            </div>
+            <div class="relative z-20 -mt-12 pt-12 px-6 bg-gradient-to-t from-card via-card to-transparent">
+              <div class="flex justify-between items-baseline mb-2">
+                <h3 class="text-xl font-serif font-bold text-foreground">Full Hot Towel Shave</h3>
+                <span class="text-lg font-bold text-primary">$50</span>
+              </div>
+            </div>
+            <div class="px-6 pb-6 pt-2">
+              <p class="text-muted-foreground leading-relaxed text-sm">
+                Traditional straight edge shave with multiple hot towels, pre-shave oils, and facial massage.
+              </p>
+            </div>
+          </div>
+
+          <!-- Service: Hot Towel Head Shave -->
+          <div class="group overflow-hidden bg-card/50 hover:bg-card transition-colors duration-300 rounded-lg">
+            <div class="relative h-56 overflow-hidden">
+              <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors z-10"></div>
+              <img
+                src="/attached_assets/generated_images/hot_towel_shave_and_beard_trim_service.png"
+                alt="Hot Towel Head Shave"
+                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+            </div>
+            <div class="relative z-20 -mt-12 pt-12 px-6 bg-gradient-to-t from-card via-card to-transparent">
+              <div class="flex justify-between items-baseline mb-2">
+                <h3 class="text-xl font-serif font-bold text-foreground">Hot Towel Head Shave</h3>
+                <span class="text-lg font-bold text-primary">$50</span>
+              </div>
+            </div>
+            <div class="px-6 pb-6 pt-2">
+              <p class="text-muted-foreground leading-relaxed text-sm">
+                Smooth straight razor head shave with steaming hot towels and moisturizing treatment.
+              </p>
+            </div>
+          </div>
+
+          <!-- Service: Long Haircut -->
+          <div class="group overflow-hidden bg-card/50 hover:bg-card transition-colors duration-300 rounded-lg">
+            <div class="relative h-56 overflow-hidden">
+              <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors z-10"></div>
+              <img
+                src="/attached_assets/generated_images/close_up_professional_haircut_service.png"
+                alt="Long Haircut"
+                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+            </div>
+            <div class="relative z-20 -mt-12 pt-12 px-6 bg-gradient-to-t from-card via-card to-transparent">
+              <div class="flex justify-between items-baseline mb-2">
+                <h3 class="text-xl font-serif font-bold text-foreground">Long Haircut</h3>
+                <span class="text-lg font-bold text-primary">$55</span>
+              </div>
+            </div>
+            <div class="px-6 pb-6 pt-2">
+              <p class="text-muted-foreground leading-relaxed text-sm">
+                For hair shoulder length or longer. Includes consultation, wash, precision cut, and style.
+              </p>
+            </div>
+          </div>
+
+          <!-- Service: Kids Haircut -->
+          <div class="group overflow-hidden bg-card/50 hover:bg-card transition-colors duration-300 rounded-lg">
+            <div class="relative h-56 overflow-hidden">
+              <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors z-10"></div>
+              <img
+                src="/attached_assets/generated_images/vintage_barber_tools_artistic_shot.png"
+                alt="Kids Haircut"
+                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+            </div>
+            <div class="relative z-20 -mt-12 pt-12 px-6 bg-gradient-to-t from-card via-card to-transparent">
+              <div class="flex justify-between items-baseline mb-2">
+                <h3 class="text-xl font-serif font-bold text-foreground">Kids Cut (Under 10)</h3>
+                <span class="text-lg font-bold text-primary">$30</span>
+              </div>
+            </div>
+            <div class="px-6 pb-6 pt-2">
+              <p class="text-muted-foreground leading-relaxed text-sm">
+                Patient and careful service for our younger gentlemen. Includes a lollipop!
+              </p>
+            </div>
+          </div>
+
         </div>
       </div>
     </section>
@@ -266,9 +428,9 @@
         <p class="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
           Book your appointment today and experience the difference of a true VIP service.
         </p>
-        <a href="booking.html" class="inline-flex items-center justify-center bg-primary text-primary-foreground hover:bg-primary/90 font-bold text-lg px-10 py-6 uppercase tracking-wider shadow-lg shadow-primary/20 transition-colors">
+        <button class="bg-primary text-primary-foreground hover:bg-primary/90 font-bold text-lg px-10 py-6 uppercase tracking-wider shadow-lg shadow-primary/20 transition-colors">
           Book Appointment Now
-        </a>
+        </button>
       </div>
     </section>
 
@@ -278,7 +440,7 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           <!-- Brand -->
           <div class="md:col-span-1">
-            <a href="index.html" class="text-2xl font-serif font-bold tracking-tighter text-primary mb-6 block">
+            <a href="#" class="text-2xl font-serif font-bold tracking-tighter text-primary mb-6 block">
               VIP<span class="text-foreground">BARBER</span>
             </a>
             <p class="text-muted-foreground mb-6 leading-relaxed">
@@ -301,10 +463,10 @@
           <div>
             <h4 class="text-foreground font-serif font-bold mb-6">Explore</h4>
             <ul class="space-y-4">
-              <li><a href="index.html" class="text-muted-foreground hover:text-primary transition-colors">Home</a></li>
+              <li><a href="#" class="text-muted-foreground hover:text-primary transition-colors">Home</a></li>
               <li><a href="#services" class="text-muted-foreground hover:text-primary transition-colors">Services</a></li>
               <li><a href="#about" class="text-muted-foreground hover:text-primary transition-colors">About Us</a></li>
-              <li><a href="booking.html" class="text-muted-foreground hover:text-primary transition-colors">Book Now</a></li>
+              <li><a href="#booking" class="text-muted-foreground hover:text-primary transition-colors">Book Now</a></li>
             </ul>
           </div>
 
